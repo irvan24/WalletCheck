@@ -1,59 +1,101 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { Search, Shield, Database, CheckCircle, Activity, Zap } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from "react";
+import {
+  Search,
+  Shield,
+  Database,
+  CheckCircle,
+  Activity,
+  Zap,
+} from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LoadingPage() {
-  const [progress, setProgress] = useState(0)
-  const [currentStep, setCurrentStep] = useState(0)
-  const [pulseAnimation, setPulseAnimation] = useState(false)
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const address = searchParams.get('address')
+  const [progress, setProgress] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [pulseAnimation, setPulseAnimation] = useState(false);
+  const [walletData, setWalletData] = useState(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const address = searchParams.get("address");
+
+  useEffect(() => {
+    if (!address) return;
+
+    const fetchData = async () => {
+      try {
+        const res = await fetch(`http://localhost:3001/api/wallet/${address}`);
+        const data = await res.json();
+        setWalletData(data);
+        localStorage.setItem("walletData", JSON.stringify(data))
+        console.log("✅ Wallet data:", data);
+      } catch (err) {
+        console.error("Erreur lors de la récupération des données :", err);
+      }
+    };
+
+    fetchData();
+  }, [address]);
+
   
   const steps = [
     { icon: Search, text: "Recherche de l'adresse", color: "text-blue-400" },
-    { icon: Database, text: "Récupération des données", color: "text-green-400" },
-    { icon: Shield, text: "Analyse des autorisations", color: "text-yellow-400" },
-    { icon: Activity, text: "Évaluation des risques", color: "text-orange-400" },
-    { icon: CheckCircle, text: "Finalisation du rapport", color: "text-purple-400" }
-  ]
+    {
+      icon: Database,
+      text: "Récupération des données",
+      color: "text-green-400",
+    },
+    {
+      icon: Shield,
+      text: "Analyse des autorisations",
+      color: "text-yellow-400",
+    },
+    {
+      icon: Activity,
+      text: "Évaluation des risques",
+      color: "text-orange-400",
+    },
+    {
+      icon: CheckCircle,
+      text: "Finalisation du rapport",
+      color: "text-purple-400",
+    },
+  ];
 
   useEffect(() => {
-    setPulseAnimation(true)
-    
+    setPulseAnimation(true);
+
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
-          clearInterval(interval)
-          return 100
+          clearInterval(interval);
+          return 100;
         }
-        const increment = Math.floor(Math.random() * 8 + 3)
-        return Math.min(prev + increment, 100)
-      })
-    }, 200)
+        const increment = Math.floor(Math.random() * 8 + 3);
+        return Math.min(prev + increment, 100);
+      });
+    }, 200);
 
-    return () => clearInterval(interval)
-  }, [])
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
-    const stepIndex = Math.floor((progress / 100) * steps.length)
-    setCurrentStep(Math.min(stepIndex, steps.length - 1))
-  }, [progress])
+    const stepIndex = Math.floor((progress / 100) * steps.length);
+    setCurrentStep(Math.min(stepIndex, steps.length - 1));
+  }, [progress]);
 
   useEffect(() => {
     if (progress >= 100 && address) {
       const timeout = setTimeout(() => {
-        router.push(`/scan/${address}`)
-      }, 1000) // délai de 1 seconde après 100%
-  
-      return () => clearTimeout(timeout)
-    }
-  }, [progress, address, router])
-  
+        router.push(`/scan/${address}`);
+      }, 1000); // délai de 1 seconde après 100%
 
-  const CurrentIcon = steps[currentStep].icon
+      return () => clearTimeout(timeout);
+    }
+  }, [progress, address, router]);
+
+  const CurrentIcon = steps[currentStep].icon;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white relative overflow-hidden">
@@ -71,38 +113,42 @@ export default function LoadingPage() {
             <div className="relative w-24 h-24 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-2xl">
               <CurrentIcon className="w-12 h-12 text-white transition-all duration-500" />
             </div>
-            
+
             <div className="absolute inset-0 w-24 h-24 border-2 border-transparent border-t-yellow-400 border-r-yellow-400 rounded-2xl animate-spin"></div>
-            
+
             <div className="absolute inset-0 w-40 h-40 -m-8">
               {[...Array(8)].map((_, i) => {
-                const angle = (i / 8) * 2 * Math.PI - Math.PI / 2
-                const radius = 45
-                const x = 50 + radius * Math.cos(angle)
-                const y = 50 + radius * Math.sin(angle)
-                
+                const angle = (i / 8) * 2 * Math.PI - Math.PI / 2;
+                const radius = 45;
+                const x = 50 + radius * Math.cos(angle);
+                const y = 50 + radius * Math.sin(angle);
+
                 return (
                   <div
                     key={i}
                     className={`absolute w-3 h-3 rounded-full transition-all duration-300 ${
-                      i <= (progress / 100) * 8 ? 'bg-yellow-400 shadow-lg' : 'bg-gray-600'
+                      i <= (progress / 100) * 8
+                        ? "bg-yellow-400 shadow-lg"
+                        : "bg-gray-600"
                     }`}
                     style={{
                       left: `${x}%`,
                       top: `${y}%`,
-                      transform: 'translate(-50%, -50%)'
+                      transform: "translate(-50%, -50%)",
                     }}
                   />
-                )
+                );
               })}
             </div>
           </div>
-          
+
           <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-white via-yellow-200 to-yellow-400 bg-clip-text text-transparent">
             Analyse en cours
           </h1>
-          
-          <p className={`text-xl transition-all duration-500 ${steps[currentStep].color}`}>
+
+          <p
+            className={`text-xl transition-all duration-500 ${steps[currentStep].color}`}
+          >
             {steps[currentStep].text}
           </p>
         </div>
@@ -116,43 +162,58 @@ export default function LoadingPage() {
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
             </div>
           </div>
-          
+
           <div className="text-center">
-            <span className="text-3xl font-bold text-yellow-400">{progress}%</span>
+            <span className="text-3xl font-bold text-yellow-400">
+              {progress}%
+            </span>
             <span className="text-gray-400 ml-2">complété</span>
           </div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8 w-full max-w-4xl">
           {steps.map((step, index) => {
-            const StepIcon = step.icon
-            const isActive = index === currentStep
-            const isCompleted = index < currentStep
-            
+            const StepIcon = step.icon;
+            const isActive = index === currentStep;
+            const isCompleted = index < currentStep;
+
             return (
               <div
                 key={index}
                 className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-500 ${
-                  isActive ? 'bg-white/10 backdrop-blur-md scale-105' : 'bg-white/5'
-                } ${isCompleted ? 'opacity-60' : ''}`}
+                  isActive
+                    ? "bg-white/10 backdrop-blur-md scale-105"
+                    : "bg-white/5"
+                } ${isCompleted ? "opacity-60" : ""}`}
               >
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${
-                  isActive ? 'bg-gradient-to-r from-yellow-400 to-orange-500' : 
-                  isCompleted ? 'bg-green-500' : 'bg-gray-600'
-                }`}>
+                <div
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                    isActive
+                      ? "bg-gradient-to-r from-yellow-400 to-orange-500"
+                      : isCompleted
+                      ? "bg-green-500"
+                      : "bg-gray-600"
+                  }`}
+                >
                   {isCompleted ? (
                     <CheckCircle className="w-5 h-5 text-white" />
                   ) : (
-                    <StepIcon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-400'}`} />
+                    <StepIcon
+                      className={`w-5 h-5 ${
+                        isActive ? "text-white" : "text-gray-400"
+                      }`}
+                    />
                   )}
                 </div>
-                <span className={`text-xs text-center transition-all duration-300 leading-tight ${
-                  isActive ? step.color : 'text-gray-400'
-                }`}>
+                <span
+                  className={`text-xs text-center transition-all duration-300 leading-tight ${
+                    isActive ? step.color : "text-gray-400"
+                  }`}
+                >
                   {step.text}
                 </span>
               </div>
-            )
+            );
           })}
         </div>
 
@@ -169,7 +230,9 @@ export default function LoadingPage() {
               Analyse de tous vos tokens
             </div>
             <div className="p-3 bg-white/5 rounded-lg">
-              <span className="text-green-400 font-semibold">Autorisations</span>
+              <span className="text-green-400 font-semibold">
+                Autorisations
+              </span>
               <br />
               Vérification des permissions
             </div>
@@ -206,10 +269,14 @@ export default function LoadingPage() {
           animation: shimmer 2s infinite;
         }
         @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
         }
       `}</style>
     </div>
-  )
+  );
 }

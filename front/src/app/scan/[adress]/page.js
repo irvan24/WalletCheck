@@ -22,100 +22,63 @@ import {
   BarChart3,
   AlertCircle
 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+
 
 export default function WalletResultsPage() {
-  const [activeTab, setActiveTab] = useState('overview')
-  const [copiedAddress, setCopiedAddress] = useState(false)
-  const [isAnimated, setIsAnimated] = useState(false)
-
-  const walletData = {
-    address: '0x742d35Cc6634C0532925a3b8D345aEbe6D1f4f83',
-    ensName: 'vitalik.eth',
-    healthScore: 85,
-    riskLevel: 'Modéré',
-    lastActivity: '2024-01-15',
-    totalValue: 125430.50,
-    totalTokens: 23,
-    activeApprovals: 12,
-    riskApprovals: 3
-  }
-
-  const tokens = [
-    { symbol: 'ETH', name: 'Ethereum', balance: 42.5, value: 95625.00, change: 2.3 },
-    { symbol: 'USDC', name: 'USD Coin', balance: 15000, value: 15000.00, change: 0.1 },
-    { symbol: 'UNI', name: 'Uniswap', balance: 850, value: 8925.50, change: -1.2 },
-    { symbol: 'LINK', name: 'Chainlink', balance: 320, value: 4480.00, change: 5.7 },
-    { symbol: 'COMP', name: 'Compound', balance: 45, value: 1400.00, change: -0.8 }
-  ]
-
-  const approvals = [
-    { 
-      protocol: 'Uniswap V3', 
-      token: 'USDC', 
-      amount: 'Unlimited', 
-      risk: 'high',
-      lastUsed: '2024-01-10',
-      spender: '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45'
-    },
-    { 
-      protocol: '1inch', 
-      token: 'ETH', 
-      amount: '5.0', 
-      risk: 'medium',
-      lastUsed: '2024-01-12',
-      spender: '0x1111111254fb6c44bAC0beD2854e76F90643097d'
-    },
-    { 
-      protocol: 'OpenSea', 
-      token: 'NFT Collection', 
-      amount: 'All', 
-      risk: 'high',
-      lastUsed: '2023-12-20',
-      spender: '0x00000000006c3852cbEf3e08E8dF289169EdE581'
+    const [activeTab, setActiveTab] = useState('overview')
+    const [copiedAddress, setCopiedAddress] = useState(false)
+    const [isAnimated, setIsAnimated] = useState(false)
+    const [walletData, setWalletData] = useState(null)
+    const router = useRouter()
+  
+    useEffect(() => {
+      const storedData = localStorage.getItem('walletData')
+      if (!storedData) {
+        router.push('/')
+        return
+      }
+      setWalletData(JSON.parse(storedData))
+      console.log(walletData);
+      setIsAnimated(true)
+    }, [router])
+  
+    if (!walletData) return null
+  
+    const copyAddress = () => {
+      navigator.clipboard.writeText(walletData.address)
+      setCopiedAddress(true)
+      setTimeout(() => setCopiedAddress(false), 2000)
     }
-  ]
-
-  const activities = [
-    { type: 'send', token: 'ETH', amount: '2.5', to: '0x123...abc', time: '2024-01-15 14:30', hash: '0xabc123' },
-    { type: 'receive', token: 'USDC', amount: '1000', from: '0x456...def', time: '2024-01-15 10:15', hash: '0xdef456' },
-    { type: 'swap', token: 'ETH → USDC', amount: '1.2', protocol: 'Uniswap', time: '2024-01-14 16:45', hash: '0x789ghi' },
-    { type: 'approve', token: 'LINK', protocol: 'Aave', time: '2024-01-14 12:20', hash: '0xjkl012' }
-  ]
-
-  useEffect(() => {
-    setIsAnimated(true)
-  }, [])
-
-  const copyAddress = () => {
-    navigator.clipboard.writeText(walletData.address)
-    setCopiedAddress(true)
-    setTimeout(() => setCopiedAddress(false), 2000)
-  }
-
-  const getHealthColor = (score) => {
-    if (score >= 80) return 'text-green-400'
-    if (score >= 60) return 'text-yellow-400'
-    return 'text-red-400'
-  }
-
-  const getHealthBgColor = (score) => {
-    if (score >= 80) return 'bg-green-500'
-    if (score >= 60) return 'bg-yellow-500'
-    return 'bg-red-500'
-  }
-
-  const getRiskColor = (risk) => {
-    switch (risk) {
-      case 'high': return 'text-red-400 bg-red-500/20'
-      case 'medium': return 'text-yellow-400 bg-yellow-500/20'
-      case 'low': return 'text-green-400 bg-green-500/20'
-      default: return 'text-gray-400 bg-gray-500/20'
+  
+    const getHealthColor = (score) => {
+      if (score >= 80) return 'text-green-400'
+      if (score >= 60) return 'text-yellow-400'
+      return 'text-red-400'
     }
-  }
-
-  const formatAddress = (address) => {
-    return `${address.slice(0, 6)}...${address.slice(-4)}`
-  }
+  
+    const getHealthBgColor = (score) => {
+      if (score >= 80) return 'bg-green-500'
+      if (score >= 60) return 'bg-yellow-500'
+      return 'bg-red-500'
+    }
+  
+    const getRiskColor = (risk) => {
+      switch (risk) {
+        case 'high': return 'text-red-400 bg-red-500/20'
+        case 'medium': return 'text-yellow-400 bg-yellow-500/20'
+        case 'low': return 'text-green-400 bg-green-500/20'
+        default: return 'text-gray-400 bg-gray-500/20'
+      }
+    }
+     
+    const handleBack = () => {
+        router.push("/")
+    }
+  
+    const formatAddress = (address) => {
+      return `${address.slice(0, 6)}...${address.slice(-4)}`
+    }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white relative overflow-hidden">
@@ -131,7 +94,7 @@ export default function WalletResultsPage() {
       <div className="relative z-10 p-6">
         {/* Header */}
         <div className={`mb-8 transition-all duration-1000 ${isAnimated ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <button className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4">
+          <button onClick={handleBack} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4">
             <ArrowLeft className="w-5 h-5" />
             Retour à l'accueil
           </button>
@@ -197,7 +160,7 @@ export default function WalletResultsPage() {
               <TrendingUp className="w-5 h-5 text-green-400" />
             </div>
             <div className="text-2xl font-bold text-white mb-1">
-              ${walletData.totalValue.toLocaleString()}
+            ${walletData.totalValue?.toLocaleString() || '0'}
             </div>
             <div className="text-sm text-gray-400">Valeur totale</div>
           </div>
@@ -298,7 +261,7 @@ export default function WalletResultsPage() {
                   Top tokens
                 </h3>
                 <div className="space-y-3">
-                  {tokens.slice(0, 3).map((token, index) => (
+                {walletData.tokens?.map((token, index) => (
                     <div key={index} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-xs font-bold">
@@ -339,7 +302,7 @@ export default function WalletResultsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {tokens.map((token, index) => (
+                  {walletData.tokens?.map((token, index) => (
                       <tr key={index} className="border-b border-white/10 hover:bg-white/5">
                         <td className="py-4 px-4">
                           <div className="flex items-center gap-3">
@@ -378,7 +341,7 @@ export default function WalletResultsPage() {
                 Autorisations actives
               </h3>
               <div className="space-y-4">
-                {approvals.map((approval, index) => (
+              {walletData.approvals?.map((approval, index) => (
                   <div key={index} className="p-4 bg-white/5 rounded-xl border border-white/10">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">
@@ -423,7 +386,7 @@ export default function WalletResultsPage() {
                 Activité récente
               </h3>
               <div className="space-y-4">
-                {activities.map((activity, index) => (
+              {walletData.activities?.map((activity, index) => (
                   <div key={index} className="p-4 bg-white/5 rounded-xl border border-white/10">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
