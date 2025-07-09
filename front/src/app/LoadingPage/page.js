@@ -2,12 +2,16 @@
 
 import { useEffect, useState } from 'react'
 import { Search, Shield, Database, CheckCircle, Activity, Zap } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function LoadingPage() {
   const [progress, setProgress] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
   const [pulseAnimation, setPulseAnimation] = useState(false)
-
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const address = searchParams.get('address')
+  
   const steps = [
     { icon: Search, text: "Recherche de l'adresse", color: "text-blue-400" },
     { icon: Database, text: "Récupération des données", color: "text-green-400" },
@@ -38,33 +42,38 @@ export default function LoadingPage() {
     setCurrentStep(Math.min(stepIndex, steps.length - 1))
   }, [progress])
 
+  useEffect(() => {
+    if (progress >= 100 && address) {
+      const timeout = setTimeout(() => {
+        router.push(`/scan/${address}`)
+      }, 1000) // délai de 1 seconde après 100%
+  
+      return () => clearTimeout(timeout)
+    }
+  }, [progress, address, router])
+  
+
   const CurrentIcon = steps[currentStep].icon
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white relative overflow-hidden">
-      {/* Animated background elements */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-10 left-10 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
         <div className="absolute top-0 right-4 w-72 h-72 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-2000"></div>
         <div className="absolute -bottom-8 left-20 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-4000"></div>
       </div>
 
-      {/* Grid pattern overlay */}
       <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
 
       <main className="relative z-10 flex flex-col items-center justify-center min-h-screen p-6">
-        {/* Header with animated icon */}
         <div className="text-center mb-12">
           <div className="relative mb-8 inline-block">
-            {/* Main icon container */}
             <div className="relative w-24 h-24 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-2xl">
               <CurrentIcon className="w-12 h-12 text-white transition-all duration-500" />
             </div>
             
-            {/* Rotating ring */}
             <div className="absolute inset-0 w-24 h-24 border-2 border-transparent border-t-yellow-400 border-r-yellow-400 rounded-2xl animate-spin"></div>
             
-            {/* Progress dots around the icon */}
             <div className="absolute inset-0 w-40 h-40 -m-8">
               {[...Array(8)].map((_, i) => {
                 const angle = (i / 8) * 2 * Math.PI - Math.PI / 2
@@ -98,27 +107,22 @@ export default function LoadingPage() {
           </p>
         </div>
 
-        {/* Progress section */}
         <div className="w-full max-w-2xl mb-8">
-          {/* Main progress bar */}
           <div className="relative w-full h-4 bg-white/10 backdrop-blur-md rounded-full overflow-hidden mb-4">
             <div
               className="h-full bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-600 transition-all duration-300 ease-out relative"
               style={{ width: `${progress}%` }}
             >
-              {/* Animated shine effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
             </div>
           </div>
           
-          {/* Progress percentage */}
           <div className="text-center">
             <span className="text-3xl font-bold text-yellow-400">{progress}%</span>
             <span className="text-gray-400 ml-2">complété</span>
           </div>
         </div>
 
-        {/* Steps indicator */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8 w-full max-w-4xl">
           {steps.map((step, index) => {
             const StepIcon = step.icon
@@ -177,7 +181,6 @@ export default function LoadingPage() {
           </div>
         </div>
 
-        {/* Animated dots */}
         <div className="flex gap-2 mt-8">
           {[...Array(3)].map((_, i) => (
             <div

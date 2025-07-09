@@ -13,11 +13,6 @@ globalThis.__BUILD_MANIFEST = {
   ],
   "rootMainFilesTree": {},
   "pages": {
-    "/LoadingPage": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/LoadingPage.js"
-    ],
     "/_app": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",

@@ -1,3 +1,5 @@
 {
-  "/page": "app/page.js"
+  "/page": "app/page.js",
+  "/LoadingPage/page": "app/LoadingPage/page.js",
+  "/scan/[adress]/page": "app/scan/[adress]/page.js"
 }

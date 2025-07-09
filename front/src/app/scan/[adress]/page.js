@@ -28,7 +28,6 @@ export default function WalletResultsPage() {
   const [copiedAddress, setCopiedAddress] = useState(false)
   const [isAnimated, setIsAnimated] = useState(false)
 
-  // Données simulées pour la démo
   const walletData = {
     address: '0x742d35Cc6634C0532925a3b8D345aEbe6D1f4f83',
     ensName: 'vitalik.eth',
