@@ -89,7 +89,7 @@ export default function LoadingPage() {
     if (progress >= 100 && address) {
       const timeout = setTimeout(() => {
         router.push(`/scan/${address}`);
-      }, 1000); // délai de 1 seconde après 100%
+      }, 1000);
 
       return () => clearTimeout(timeout);
     }
@@ -114,7 +114,6 @@ export default function LoadingPage() {
               <CurrentIcon className="w-12 h-12 text-white transition-all duration-500" />
             </div>
 
-            <div className="absolute inset-0 w-24 h-24 border-2 border-transparent border-t-yellow-400 border-r-yellow-400 rounded-2xl animate-spin"></div>
 
             <div className="absolute inset-0 w-40 h-40 -m-8">
               {[...Array(8)].map((_, i) => {
@@ -217,7 +216,6 @@ export default function LoadingPage() {
           })}
         </div>
 
-        {/* Loading tips */}
         <div className="text-center max-w-2xl">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Zap className="w-5 h-5 text-yellow-400" />
